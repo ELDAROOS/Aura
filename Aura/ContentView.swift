@@ -5,12 +5,17 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Artist.name) private var artists: [Artist]
+    @Bindable var audioPlayer = AudioPlayerService.shared
     
-    @State private var selectedArtist: Artist?
-    @State private var selectedPlaylist: SmartPlaylistType?
+    @State private var sidebarSelection: SidebarSelection?
     @State private var isInspectorPresented = false
     @State private var isSettingsPresented = false
     @State private var searchText = ""
+    
+    enum SidebarSelection: Hashable {
+        case playlist(SmartPlaylistType)
+        case artist(Artist)
+    }
     
     enum SmartPlaylistType: String, CaseIterable, Identifiable {
         case recentlyAdded = "Recently Added"
@@ -48,115 +53,36 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            List {
+            List(selection: $sidebarSelection) {
                 if searchText.isEmpty {
                     Section("Discovery") {
                         ForEach(SmartPlaylistType.allCases) { playlist in
-                            Button(action: { 
-                                selectedPlaylist = playlist
-                                selectedArtist = nil
-                            }) {
+                            NavigationLink(value: SidebarSelection.playlist(playlist)) {
                                 Label(playlist.rawValue, systemImage: playlist.icon)
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(selectedPlaylist == playlist ? Color.accentColor : .primary)
-                            .padding(.vertical, 2)
                         }
                     }
                     
                     Section("Library") {
                         ForEach(filteredArtists) { artist in
-                            Button(action: { 
-                                selectedArtist = artist
-                                selectedPlaylist = nil
-                            }) {
-                                HStack {
-                                    Image(systemName: "music.mic")
-                                        .foregroundColor(.accentColor)
-                                    Text(artist.name)
-                                }
+                            NavigationLink(value: SidebarSelection.artist(artist)) {
+                                Label(artist.name, systemImage: "music.mic")
                             }
-                            .buttonStyle(.plain)
-                            .foregroundStyle(selectedArtist == artist ? Color.accentColor : .primary)
-                            .padding(.vertical, 2)
                         }
                     }
                 } else {
-                    Section("Search Results") {
-                        if !filteredArtists.isEmpty {
-                            Text("Artists").font(.caption).foregroundColor(.secondary)
-                            ForEach(filteredArtists) { artist in
-                                Button(action: { selectedArtist = artist }) {
-                                    Label(artist.name, systemImage: "music.mic")
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        
-                        if !filteredTracks.isEmpty {
-                            Text("Songs").font(.caption).foregroundColor(.secondary).padding(.top, 8)
-                            ForEach(filteredTracks.prefix(10)) { track in
-                                Button(action: { audioPlayer.play(track: track, in: filteredTracks) }) {
-                                    VStack(alignment: .leading) {
-                                        Text(track.title).font(.system(size: 13))
-                                        Text(track.album?.artist?.name ?? "").font(.system(size: 11)).foregroundColor(.secondary)
-                                    }
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                    }
+                    searchResultsSection
                 }
             }
             .navigationTitle("Aura")
             .searchable(text: $searchText, placement: .sidebar, prompt: "Artists, Songs...")
         } content: {
-            if !searchText.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Searching for \"\(searchText)\"")
-                        .font(.largeTitle).bold()
-                    Text("Found \(filteredArtists.count) artists and \(filteredTracks.count) songs.")
-                        .foregroundColor(.secondary)
-                    Divider()
-                }
-                .padding()
-            } else if let selectedArtist {
-                ArtistDetailView(artist: selectedArtist)
-            } else if let selectedPlaylist {
-                VStack(alignment: .leading, spacing: 10) {
-                    Label(selectedPlaylist.rawValue, systemImage: selectedPlaylist.icon)
-                        .font(.largeTitle).bold()
-                    Text("Automatically curated based on your library.")
-                        .foregroundColor(.secondary)
-                    Divider()
-                }
-                .padding()
-            } else {
-                Text("Select an item")
-                    .foregroundStyle(.secondary)
-            }
+            contentView
         } detail: {
-            if !searchText.isEmpty {
-                TrackListView(tracks: filteredTracks)
-            } else if let selectedArtist, let albums = selectedArtist.albums {
-                let tracks = albums.flatMap { $0.tracks ?? [] }
-                TrackListView(tracks: tracks)
-            } else if let selectedPlaylist {
-                let smartTracks = getSmartTracks(for: selectedPlaylist)
-                TrackListView(tracks: smartTracks)
-            } else {
-                ContentUnavailableView("No Selection", systemImage: "music.note.list", description: Text("Select an artist or search for music."))
-            }
+            detailView
         }
         .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-            Task {
-                for provider in providers {
-                    if let item = try? await provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) as? URL {
-                        try? await MetadataParser.parseID3Tags(from: item, context: modelContext)
-                    }
-                }
-            }
-            return true
+            handleDrop(providers: providers)
         }
         .sheet(isPresented: $isSettingsPresented) {
             SettingsView()
@@ -182,12 +108,101 @@ struct ContentView: View {
         }
     }
     
+    @ViewBuilder
+    private var searchResultsSection: some View {
+        Section("Search Results") {
+            if !filteredArtists.isEmpty {
+                Text("Artists").font(.caption).foregroundColor(.secondary)
+                ForEach(filteredArtists) { artist in
+                    Button(action: { sidebarSelection = .artist(artist) }) {
+                        Label(artist.name, systemImage: "music.mic")
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            
+            if !filteredTracks.isEmpty {
+                Text("Songs").font(.caption).foregroundColor(.secondary).padding(.top, 8)
+                ForEach(filteredTracks.prefix(10)) { track in
+                    Button(action: { audioPlayer.play(track: track, in: filteredTracks) }) {
+                        VStack(alignment: .leading) {
+                            Text(track.title).font(.system(size: 13))
+                            Text(track.album?.artist?.name ?? "").font(.system(size: 11)).foregroundColor(.secondary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    private var contentView: some View {
+        if !searchText.isEmpty {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Searching for \"\(searchText)\"")
+                    .font(.largeTitle).bold()
+                Text("Found \(filteredArtists.count) artists and \(filteredTracks.count) songs.")
+                    .foregroundColor(.secondary)
+                Divider()
+            }
+            .padding()
+        } else if let sidebarSelection {
+            switch sidebarSelection {
+            case .artist(let artist):
+                ArtistDetailView(artist: artist)
+            case .playlist(let playlist):
+                VStack(alignment: .leading, spacing: 10) {
+                    Label(playlist.rawValue, systemImage: playlist.icon)
+                        .font(.largeTitle).bold()
+                    Text("Automatically curated based on your library.")
+                        .foregroundColor(.secondary)
+                    Divider()
+                }
+                .padding()
+            }
+        } else {
+            Text("Select an item")
+                .foregroundStyle(.secondary)
+        }
+    }
+    
+    @ViewBuilder
+    private var detailView: some View {
+        if !searchText.isEmpty {
+            TrackListView(tracks: filteredTracks)
+        } else if let sidebarSelection {
+            switch sidebarSelection {
+            case .artist(let artist):
+                if let albums = artist.albums {
+                    let tracks = albums.flatMap { $0.tracks ?? [] }
+                    TrackListView(tracks: tracks)
+                }
+            case .playlist(let playlist):
+                let smartTracks = getSmartTracks(for: playlist)
+                TrackListView(tracks: smartTracks)
+            }
+        } else {
+            ContentUnavailableView("No Selection", systemImage: "music.note.list", description: Text("Select an artist or search for music."))
+        }
+    }
+    
+    private func handleDrop(providers: [NSItemProvider]) -> Bool {
+        Task {
+            for provider in providers {
+                if let item = try? await provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) as? URL {
+                    try? await MetadataParser.parseID3Tags(from: item, context: modelContext)
+                }
+            }
+        }
+        return true
+    }
+    
     private func getSmartTracks(for type: SmartPlaylistType) -> [Track] {
         let allTracks = artists.flatMap { $0.albums ?? [] }.flatMap { $0.tracks ?? [] }
         
         switch type {
         case .recentlyAdded:
-            // For now, use UUID as a proxy for 'recently added' order, or just return first 20
             return Array(allTracks.prefix(20))
         case .favorites:
             return allTracks.sorted(by: { $0.playCount > $1.playCount }).prefix(20).map { $0 }

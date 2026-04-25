@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct LyricsView: View {
-    var track: Track
+    @Bindable var track: Track
     @Environment(\.dismiss) private var dismiss
+    @State private var isTranscribing = false
+    @State private var errorMessage: String?
     
     var body: some View {
         ZStack {
@@ -52,32 +55,95 @@ struct LyricsView: View {
                 
                 // Lyrics Scroll Area
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        if let lyrics = track.lyrics, !lyrics.isEmpty {
-                            Text(lyrics)
-                                .font(.system(size: 44, weight: .black, design: .rounded))
-                                .foregroundColor(.white)
-                                .multilineTextAlignment(.leading)
-                                .lineSpacing(8)
-                                .shadow(color: .black.opacity(0.3), radius: 10)
-                        } else {
-                            VStack(spacing: 20) {
-                                Spacer(minLength: 100)
-                                Image(systemName: "music.note.list")
-                                    .font(.system(size: 60))
-                                    .foregroundColor(.white.opacity(0.2))
-                                Text("Lyrics not found")
-                                    .font(.title2)
-                                    .bold()
-                                    .foregroundColor(.white.opacity(0.4))
+                    VStack(alignment: .leading, spacing: 32) {
+                        if let lyrics = track.lyrics {
+                            if !lyrics.isEmpty {
+                                Text(lyrics)
+                                    .font(.system(size: 48, weight: .black, design: .rounded))
+                                    .foregroundColor(.white)
+                                    .multilineTextAlignment(.leading)
+                                    .lineSpacing(12)
+                                    .shadow(color: .black.opacity(0.3), radius: 15)
+                                    .padding(.bottom, 100) // Space for readability at the end
+                            } else {
+                                emptyStateView
                             }
-                            .frame(maxWidth: .infinity)
+                        } else {
+                            emptyStateView
                         }
                     }
-                    .padding(60)
+                    .padding(.horizontal, 60)
+                    .padding(.top, 40)
+                }
+                .overlay(
+                    LinearGradient(gradient: Gradient(colors: [.clear, .black.opacity(0.3)]), startPoint: .center, endPoint: .bottom)
+                        .allowsHitTesting(false)
+                )
+            }
+        }
+        .frame(minWidth: 700, minHeight: 800)
+    }
+    
+    @ViewBuilder
+    private var emptyStateView: some View {
+        VStack(spacing: 20) {
+            Spacer(minLength: 100)
+            Image(systemName: isTranscribing ? "waveform.and.mic" : "music.note.list")
+                .font(.system(size: 60))
+                .foregroundColor(.white.opacity(0.2))
+                .symbolEffect(.variableColor.iterative, isActive: isTranscribing)
+            
+            Text(isTranscribing ? "Aura AI is listening..." : "Lyrics not found")
+                .font(.title2)
+                .bold()
+                .foregroundColor(.white.opacity(0.4))
+            
+            if !isTranscribing {
+                Button(action: { transcribeTrack() }) {
+                    Label("Transcribe with AI", systemImage: "sparkles")
+                        .font(.headline)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(Color.white.opacity(0.2)))
+                        .foregroundColor(.white)
+                }
+                .buttonStyle(.plain)
+            }
+            
+            if let error = errorMessage {
+                Text(error)
+                    .font(.caption)
+                    .foregroundColor(.red.opacity(0.8))
+            }
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private func transcribeTrack() {
+        let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        guard let fileName = track.localFileName else {
+            errorMessage = "Local file not found."
+            return
+        }
+        let url = documentsDir.appendingPathComponent(fileName)
+        
+        isTranscribing = true
+        errorMessage = nil
+        
+        Task {
+            do {
+                let transcription = try await AITranscriptionService.transcribe(url: url)
+                await MainActor.run {
+                    track.lyrics = transcription
+                    try? track.modelContext?.save()
+                    isTranscribing = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = error.localizedDescription
+                    isTranscribing = false
                 }
             }
         }
-        .frame(minWidth: 600, minHeight: 700)
     }
 }
