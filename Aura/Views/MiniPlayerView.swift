@@ -8,17 +8,27 @@ struct MiniPlayerView: View {
     var body: some View {
         if let track = audioPlayer.currentTrack {
             VStack(spacing: 0) {
-                // Integrated Progress Bar at the very top
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        Rectangle()
-                            .fill(Color.secondary.opacity(0.1))
-                        Rectangle()
-                            .fill(LinearGradient(colors: [.accentColor, .accentColor.opacity(0.7)], startPoint: .leading, endPoint: .trailing))
-                            .frame(width: geo.size.width * CGFloat(audioPlayer.playbackProgress))
+                // Interactive Progress Slider
+                VStack(spacing: -8) {
+                    Slider(value: Binding(
+                        get: { audioPlayer.currentTime },
+                        set: { audioPlayer.seek(to: $0) }
+                    ), in: 0...(audioPlayer.duration > 0 ? audioPlayer.duration : 1))
+                    .controlSize(.small)
+                    .accentColor(.accentColor)
+                    
+                    HStack {
+                        Text(audioPlayer.timeString)
+                        Spacer()
+                        Text(audioPlayer.totalTimeString)
                     }
+                    .font(.system(size: 9, weight: .bold))
+                    .foregroundColor(.secondary)
+                    .padding(.horizontal, 4)
+                    .opacity(0.8)
                 }
-                .frame(height: 3)
+                .padding(.horizontal, 0)
+                .frame(height: 12)
                 
                 HStack(spacing: 0) {
                     // Left Side: Artwork & Metadata

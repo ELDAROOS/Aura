@@ -21,6 +21,23 @@ class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     var isShuffle = false
     var currentIndex: Int = 0
     
+    var currentTime: TimeInterval = 0
+    var duration: TimeInterval = 0
+    
+    var timeString: String {
+        formatTime(currentTime)
+    }
+    
+    var totalTimeString: String {
+        formatTime(duration)
+    }
+    
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+    
     private var timer: Timer?
     
     private override init() {
@@ -56,6 +73,7 @@ class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
             if player?.play() ?? false {
                 currentTrack = track
                 isPlaying = true
+                duration = player?.duration ?? 0
                 startTimer()
                 track.playCount += 1
             }
@@ -97,8 +115,9 @@ class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     
     private func startTimer() {
         stopTimer()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self, let player = self.player else { return }
+            self.currentTime = player.currentTime
             self.playbackProgress = player.currentTime / player.duration
         }
     }
@@ -106,6 +125,12 @@ class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+    
+    func seek(to time: TimeInterval) {
+        player?.currentTime = time
+        currentTime = time
+        playbackProgress = time / (player?.duration ?? 1)
     }
     
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {

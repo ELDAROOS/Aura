@@ -21,16 +21,12 @@ struct ContentView: View {
     enum SmartPlaylistType: String, CaseIterable, Identifiable {
         case recentlyAdded = "Recently Added"
         case favorites = "Most Played"
-        case rock = "Rock Essentials"
-        case electronic = "Electronic Mix"
         
         var id: String { self.rawValue }
         var icon: String {
             switch self {
             case .recentlyAdded: return "clock.badge.checkmark"
             case .favorites: return "star.fill"
-            case .rock: return "guitars.fill"
-            case .electronic: return "bolt.horizontal.circle.fill"
             }
         }
     }
@@ -233,10 +229,6 @@ struct ContentView: View {
             return Array(allTracks.prefix(20))
         case .favorites:
             return allTracks.sorted(by: { $0.playCount > $1.playCount }).prefix(20).map { $0 }
-        case .rock:
-            return allTracks.filter { $0.album?.artist?.genre == .rock }
-        case .electronic:
-            return allTracks.filter { $0.album?.artist?.genre == .electronic }
         }
     }
 }
