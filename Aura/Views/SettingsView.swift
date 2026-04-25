@@ -7,6 +7,7 @@ struct SettingsView: View {
     
     @AppStorage("app_language") private var appLanguage: String = "system"
     @AppStorage("app_theme") private var appTheme: String = "system"
+    @AppStorage("artist_view_style") private var artistViewStyle: String = "list"
     @State private var showingConfirmation = false
     @State private var showingConsole = false
     
@@ -53,6 +54,16 @@ struct SettingsView: View {
                     } label: {
                         Label("Theme", systemImage: "paintbrush.fill")
                     }
+                }
+                
+                Section("Library View") {
+                    Picker(selection: $artistViewStyle) {
+                        Text("Classic List").tag("list")
+                        Text("Modern Grid").tag("grid")
+                    } label: {
+                        Label("Artists Style", systemImage: "square.grid.2x2")
+                    }
+                    .pickerStyle(.inline)
                 }
                 
                 Section("Developer") {

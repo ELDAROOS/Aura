@@ -14,6 +14,8 @@ struct ContentView: View {
     @State private var searchText = ""
     
     enum SidebarSelection: Hashable {
+        case home
+        case artistList
         case playlist(SmartPlaylistType)
         case artist(Artist)
     }
@@ -55,6 +57,10 @@ struct ContentView: View {
                 List(selection: $sidebarSelection) {
                     if searchText.isEmpty {
                         Section("Discovery") {
+                            NavigationLink(value: SidebarSelection.home) {
+                                Label("Home", systemImage: "house.fill")
+                            }
+                            
                             ForEach(SmartPlaylistType.allCases) { playlist in
                                 NavigationLink(value: SidebarSelection.playlist(playlist)) {
                                     Label(LocalizedStringKey(playlist.rawValue), systemImage: playlist.icon)
@@ -63,9 +69,13 @@ struct ContentView: View {
                         }
                         
                         Section("Library") {
+                            NavigationLink(value: SidebarSelection.artistList) {
+                                Label("Artists", systemImage: "music.mic")
+                            }
+                            
                             ForEach(filteredArtists) { artist in
                                 NavigationLink(value: SidebarSelection.artist(artist)) {
-                                    Label(artist.name, systemImage: "music.mic")
+                                    Label(artist.name, systemImage: "music.note")
                                 }
                             }
                         }
@@ -141,6 +151,11 @@ struct ContentView: View {
             }
         }
         .animation(.spring(response: 0.5, dampingFraction: 0.8), value: audioPlayer.isNowPlayingVisible)
+        .onAppear {
+            if sidebarSelection == nil {
+                sidebarSelection = .home
+            }
+        }
     }
     
     @ViewBuilder
@@ -175,6 +190,10 @@ struct ContentView: View {
     private var contentView: some View {
         if let sidebarSelection {
             switch sidebarSelection {
+            case .home:
+                HomeView()
+            case .artistList:
+                ArtistListView()
             case .artist(let artist):
                 ArtistDetailView(artist: artist)
             case .playlist(let playlist):
@@ -200,6 +219,10 @@ struct ContentView: View {
             TrackListView(tracks: filteredTracks)
         } else if let sidebarSelection {
             switch sidebarSelection {
+            case .home:
+                EmptyView() 
+            case .artistList:
+                EmptyView()
             case .artist(let artist):
                 if let albums = artist.albums {
                     let tracks = albums.flatMap { $0.tracks ?? [] }

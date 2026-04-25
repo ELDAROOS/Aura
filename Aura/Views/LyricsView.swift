@@ -62,17 +62,18 @@ struct LyricsView: View {
                 
                 // Lyrics Scroll Area
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 12) {
+                    VStack(alignment: .center, spacing: 12) {
                         if let lyrics = track.lyrics {
                             if !lyrics.isEmpty {
                                 Text(lyrics)
-                                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                                    .font(.system(size: 21, weight: .bold, design: .rounded))
                                     .foregroundColor(.white)
-                                    .multilineTextAlignment(.leading)
-                                    .lineSpacing(10)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .multilineTextAlignment(.center)
+                                    .lineSpacing(12)
+                                    .frame(maxWidth: .infinity, alignment: .center)
                                     .shadow(color: .black.opacity(0.1), radius: 2)
-                                    .padding(.bottom, 80)
+                                    .padding(.horizontal, 40)
+                                    .padding(.bottom, 100)
                             } else {
                                 emptyStateView
                             }
@@ -80,8 +81,7 @@ struct LyricsView: View {
                             emptyStateView
                         }
                     }
-                    .padding(.horizontal, 60)
-                    .padding(.top, 30)
+                    .padding(.top, 40)
                 }
                 .overlay(
                     LinearGradient(gradient: Gradient(colors: [.clear, .black.opacity(0.3)]), startPoint: .center, endPoint: .bottom)
