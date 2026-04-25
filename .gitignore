@@ -1,4 +1,4 @@
-# Xcode
+# Xcode & SwiftUI
 #
 build/
 DerivedData/
@@ -22,13 +22,29 @@ DerivedData
 #
 .build/
 
-# macOS
+# macOS (System files)
 #
 .DS_Store
 *.swp
 *~.nib
+.AppleDouble
+.LSOverride
+Icon
+._*
+.Spotlight-V100
+.Trashes
 
-# Aura Build Output
+# Database files (CRITICAL: prevent leaking user data)
+#
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.db
+
+# Build Artifacts (Keep these for Releases only, don't put in git)
 #
 build_output/
-Aura.zip
+*.zip
+*.dmg
+*.app
+*.pkg
