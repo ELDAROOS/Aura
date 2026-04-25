@@ -26,7 +26,7 @@ struct AuraApp: App {
         }
         .modelContainer(sharedModelContainer)
         
-        MenuBarExtra("Aura", systemImage: "waveform") {
+        MenuBarExtra("Aura", systemImage: "star.fill") {
             MenuBarView()
         }
         .menuBarExtraStyle(.window)

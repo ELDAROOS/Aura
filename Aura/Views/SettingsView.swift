@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     
     @State private var showingConfirmation = false
+    @State private var showingConsole = false
     
     var body: some View {
         VStack(spacing: 20) {
@@ -24,7 +25,31 @@ struct SettingsView: View {
             
             Divider()
             
-            VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 15) {
+                Text("Developer Tools")
+                    .font(.headline)
+                
+                Button(action: { showingConsole = true }) {
+                    HStack {
+                        Image(systemName: "terminal.fill")
+                        Text("Open Database Console")
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    .padding(10)
+                    .background(Color.accentColor.opacity(0.1))
+                    .cornerRadius(8)
+                }
+                .buttonStyle(.plain)
+                .sheet(isPresented: $showingConsole) {
+                    DatabaseConsoleView()
+                        .frame(minWidth: 800, minHeight: 600)
+                }
+                
+                Divider().padding(.vertical, 5)
+                
                 Text("Database Management")
                     .font(.headline)
                 
@@ -57,7 +82,7 @@ struct SettingsView: View {
                 .foregroundColor(.secondary)
         }
         .padding(24)
-        .frame(width: 450, height: 350)
+        .frame(width: 450, height: 450)
         .confirmationDialog("Are you sure you want to clear your entire library?", isPresented: $showingConfirmation) {
             Button("Clear All Data", role: .destructive) {
                 clearLibrary()
