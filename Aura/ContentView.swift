@@ -10,6 +10,7 @@ struct ContentView: View {
     @State private var sidebarSelection: SidebarSelection?
     @State private var isInspectorPresented = false
     @State private var isSettingsPresented = false
+    @State private var isFileImporterPresented = false
     @State private var searchText = ""
     
     enum SidebarSelection: Hashable {
@@ -93,6 +94,12 @@ struct ContentView: View {
         }
         .toolbar {
             ToolbarItem {
+                Button(action: { isFileImporterPresented.toggle() }) {
+                    Label("Add Music", systemImage: "plus")
+                }
+                .help("Add music to your library")
+            }
+            ToolbarItem {
                 Button(action: { isInspectorPresented.toggle() }) {
                     Label("Toggle Inspector", systemImage: "info.circle")
                 }
@@ -101,6 +108,26 @@ struct ContentView: View {
                 Button(action: { isSettingsPresented.toggle() }) {
                     Label("Settings", systemImage: "gearshape")
                 }
+            }
+        }
+        .fileImporter(
+            isPresented: $isFileImporterPresented,
+            allowedContentTypes: [.audio, .mp3, .mpeg4Audio],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                Task {
+                    for url in urls {
+                        // Start accessing security-scoped resource if needed
+                        if url.startAccessingSecurityScopedResource() {
+                            try? await MetadataParser.parseID3Tags(from: url, context: modelContext)
+                            url.stopAccessingSecurityScopedResource()
+                        }
+                    }
+                }
+            case .failure(let error):
+                print("Error picking files: \(error.localizedDescription)")
             }
         }
         .safeAreaInset(edge: .bottom) {

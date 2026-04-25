@@ -21,11 +21,11 @@ class AITranscriptionService {
     }
     
     private static func startTranscription(url: URL, continuation: CheckedContinuation<String, Error>) {
-        // Create recognizer for the file's locale or default
-        let recognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US")) // Default to English, but it often auto-detects or can be improved
+        // Use the system's current locale to support any language the user has configured
+        let recognizer = SFSpeechRecognizer() // Automatically uses system locale
         
         guard let recognizer = recognizer, recognizer.isAvailable else {
-            continuation.resume(throwing: NSError(domain: "AuraSpeech", code: 3, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer is not available on this device."]))
+            continuation.resume(throwing: NSError(domain: "AuraSpeech", code: 3, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer is not available for your language or on this device."]))
             return
         }
         
