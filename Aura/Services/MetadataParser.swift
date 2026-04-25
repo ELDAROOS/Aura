@@ -7,7 +7,7 @@ class MetadataParser {
         let isSecured = fileURL.startAccessingSecurityScopedResource()
         defer { if isSecured { fileURL.stopAccessingSecurityScopedResource() } }
         
-        let asset = AVAsset(url: fileURL)
+        let asset = AVURLAsset(url: fileURL)
         let duration = try await asset.load(.duration)
         let durationSeconds = Float(CMTimeGetSeconds(duration))
         
@@ -26,7 +26,6 @@ class MetadataParser {
                     if commonKey == AVMetadataKey.commonKeyTitle.rawValue { title = stringValue }
                     else if commonKey == AVMetadataKey.commonKeyArtist.rawValue { artistName = stringValue }
                     else if commonKey == AVMetadataKey.commonKeyAlbumName.rawValue { albumTitle = stringValue }
-                    else if commonKey == AVMetadataKey.commonKeyType.rawValue { genreValue = stringValue }
                 }
                 if commonKey == AVMetadataKey.commonKeyArtwork.rawValue {
                     if let data = try? await item.load(.dataValue) {
@@ -35,12 +34,32 @@ class MetadataParser {
                 }
             }
             
-            // Check for lyrics in identifier
-            if let identifier = item.identifier?.rawValue {
-                if identifier.lowercased().contains("lyric"), let stringValue = try? await item.load(.stringValue) {
+            // Advanced Genre Detection (Check Common, ID3 and iTunes keys)
+            if let stringValue = try? await item.load(.stringValue) {
+                let identifier = item.identifier?.rawValue ?? ""
+                let key = item.key as? String ?? ""
+                
+                if identifier.contains("Genre") || key == "TCON" || key == "\u{00A9}gen" || item.commonKey == .commonKeyType {
+                    genreValue = stringValue
+                }
+                
+                // Check for lyrics in identifier
+                if identifier.lowercased().contains("lyric") {
                     lyrics = stringValue
                 }
             }
+        }
+        
+        // Fuzzy matching for Genre enum
+        func matchGenre(_ raw: String) -> Genre {
+            let normalized = raw.lowercased()
+            if normalized.contains("rock") { return .rock }
+            if normalized.contains("pop") { return .pop }
+            if normalized.contains("jazz") { return .jazz }
+            if normalized.contains("class") { return .classical }
+            if normalized.contains("hip") || normalized.contains("rap") { return .hiphop }
+            if normalized.contains("elect") || normalized.contains("dance") || normalized.contains("techno") { return .electronic }
+            return .other
         }
         
         let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -62,8 +81,8 @@ class MetadataParser {
             let artist = existingArtists?.first ?? Artist(name: artistName, originCountry: "Unknown", genre: .other, biography: "")
             
             if artist.modelContext == nil {
-                // If it's a known genre, try to set it
-                if let parsedGenre = Genre(rawValue: genreValue) { artist.genre = parsedGenre }
+                // Use fuzzy matching for genre
+                artist.genre = matchGenre(genreValue)
                 if artist.profileImage == nil { artist.profileImage = coverArt }
                 context.insert(artist)
             } else if artist.profileImage == nil {

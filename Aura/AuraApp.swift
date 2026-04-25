@@ -25,5 +25,10 @@ struct AuraApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+        
+        MenuBarExtra("Aura", systemImage: "waveform") {
+            MenuBarView()
+        }
+        .menuBarExtraStyle(.window)
     }
 }
