@@ -1,0 +1,14 @@
+{
+  "images" : [
+    {
+      "idiom" : "mac",
+      "size" : "1024x1024",
+      "filename" : "Applcon.png",
+      "scale" : "1x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
