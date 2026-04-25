@@ -1,10 +1,3 @@
-//
-//  AuraApp.swift
-//  Aura
-//
-//  Created by Елдар on 25.04.2026.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,7 +5,11 @@ import SwiftData
 struct AuraApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Artist.self,
+            Album.self,
+            Track.self,
+            Playlist.self,
+            UserActivity.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

@@ -1,59 +1,65 @@
-//
-//  ContentView.swift
-//  Aura
-//
-//  Created by Елдар on 25.04.2026.
-//
-
 import SwiftUI
 import SwiftData
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    @Query(sort: \Artist.name) private var artists: [Artist]
+    
+    @State private var selectedArtist: Artist?
+    @State private var isInspectorPresented = false
+    @State private var searchText = ""
+    
+    var filteredArtists: [Artist] {
+        if searchText.isEmpty {
+            return artists
+        } else {
+            return artists.filter { $0.name.localizedCaseInsensitiveContains(searchText) }
+        }
+    }
+    
     var body: some View {
         NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
+            List(filteredArtists, selection: $selectedArtist) { artist in
+                NavigationLink(value: artist) {
+                    Text(artist.name)
                 }
-                .onDelete(perform: deleteItems)
             }
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            .toolbar {
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            .navigationTitle("Library")
+            .searchable(text: $searchText, prompt: "Search artists...")
+        } content: {
+            if let selectedArtist {
+                ArtistDetailView(artist: selectedArtist)
+            } else {
+                Text("Select an artist")
+                    .foregroundStyle(.secondary)
             }
         } detail: {
-            Text("Select an item")
-        }
-    }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+            VStack(spacing: 0) {
+                if let selectedArtist, let albums = selectedArtist.albums {
+                    let tracks = albums.flatMap { $0.tracks ?? [] }
+                    TrackListView(tracks: tracks)
+                } else {
+                    Spacer()
+                    ContentUnavailableView("No Artist Selected", systemImage: "music.mic", description: Text("Select an artist from the library to view their albums."))
+                    Spacer()
+                }
+                
+                DropZoneView()
             }
         }
+        .inspector(isPresented: $isInspectorPresented) {
+            DatabaseInspectorView()
+                .inspectorColumnWidth(min: 200, ideal: 250, max: 300)
+        }
+        .toolbar {
+            ToolbarItem {
+                Button(action: { isInspectorPresented.toggle() }) {
+                    Label("Toggle Inspector", systemImage: "info.circle")
+                }
+            }
+        }
+        .safeAreaInset(edge: .bottom) {
+            MiniPlayerView()
+        }
     }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
