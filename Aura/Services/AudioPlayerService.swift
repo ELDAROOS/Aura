@@ -20,6 +20,7 @@ class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
     var queue: [Track] = []
     var isShuffle = false
     var currentIndex: Int = 0
+    var isNowPlayingVisible = false
     
     var currentTime: TimeInterval = 0
     var duration: TimeInterval = 0

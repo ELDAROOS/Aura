@@ -417,9 +417,6 @@ struct TrackTableView: View {
     var body: some View {
         Table(tracks) {
             TableColumn("Title", value: \.title)
-            TableColumn("BPM") { track in 
-                Text("\(track.bpm)") 
-            }
             TableColumn("Duration") { track in 
                 Text(String(format: "%.2f", track.duration)) 
             }

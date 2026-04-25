@@ -3,14 +3,14 @@ import Speech
 import AVFoundation
 
 class AITranscriptionService {
-    static func transcribe(url: URL) async throws -> String {
+    static func transcribe(url: URL, localeIdentifier: String? = nil) async throws -> String {
         // 1. Request Authorization
         return try await withCheckedThrowingContinuation { continuation in
             SFSpeechRecognizer.requestAuthorization { status in
                 switch status {
                 case .authorized:
                     // Proceed with transcription
-                    startTranscription(url: url, continuation: continuation)
+                    startTranscription(url: url, localeIdentifier: localeIdentifier, continuation: continuation)
                 case .denied, .restricted, .notDetermined:
                     continuation.resume(throwing: NSError(domain: "AuraSpeech", code: 1, userInfo: [NSLocalizedDescriptionKey: "Speech recognition not authorized. Please check System Settings."]))
                 @unknown default:
@@ -20,12 +20,14 @@ class AITranscriptionService {
         }
     }
     
-    private static func startTranscription(url: URL, continuation: CheckedContinuation<String, Error>) {
-        // Use the system's current locale to support any language the user has configured
-        let recognizer = SFSpeechRecognizer() // Automatically uses system locale
+    private static func startTranscription(url: URL, localeIdentifier: String?, continuation: CheckedContinuation<String, Error>) {
+        // Use provided locale or fallback to system locale
+        let locale = localeIdentifier != nil ? Locale(identifier: localeIdentifier!) : Locale.current
+        let recognizer = SFSpeechRecognizer(locale: locale)
         
         guard let recognizer = recognizer, recognizer.isAvailable else {
-            continuation.resume(throwing: NSError(domain: "AuraSpeech", code: 3, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer is not available for your language or on this device."]))
+            let langName = locale.localizedString(forIdentifier: locale.identifier) ?? locale.identifier
+            continuation.resume(throwing: NSError(domain: "AuraSpeech", code: 3, userInfo: [NSLocalizedDescriptionKey: "Speech recognizer is not available for \(langName) on this device."]))
             return
         }
         

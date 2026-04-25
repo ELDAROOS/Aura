@@ -33,20 +33,24 @@ struct MiniPlayerView: View {
                 HStack(spacing: 0) {
                     // Left Side: Artwork & Metadata
                     HStack(spacing: 12) {
-                        ZStack {
-                            if let coverArt = track.album?.coverArt, let nsImage = NSImage(data: coverArt) {
-                                Image(nsImage: nsImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } else {
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(Color.gray.opacity(0.2))
-                                    .overlay(Image(systemName: "music.note").foregroundColor(.secondary))
+                        Button(action: { audioPlayer.isNowPlayingVisible = true }) {
+                            ZStack {
+                                if let coverArt = track.album?.coverArt, let nsImage = NSImage(data: coverArt) {
+                                    Image(nsImage: nsImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                } else {
+                                    RoundedRectangle(cornerRadius: 6)
+                                        .fill(Color.gray.opacity(0.2))
+                                        .overlay(Image(systemName: "music.note").foregroundColor(.secondary))
+                                }
                             }
+                            .frame(width: 48, height: 48)
+                            .cornerRadius(6)
+                            .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
                         }
-                        .frame(width: 48, height: 48)
-                        .cornerRadius(6)
-                        .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                        .buttonStyle(.plain)
+                        .help("Show Now Playing")
                         
                         VStack(alignment: .leading, spacing: 1) {
                             Text(track.title)

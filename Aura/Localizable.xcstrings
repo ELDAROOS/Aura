@@ -1,0 +1,620 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%lld" : {
+
+    },
+    "%lld Albums" : {
+
+    },
+    "%lld items" : {
+
+    },
+    "⌘A" : {
+
+    },
+    "⌘Q" : {
+
+    },
+    "About" : {
+
+    },
+    "Add Music" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Музыка қосу"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавить музыку"
+          }
+        }
+      }
+    },
+    "Add some music to see artists here." : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орындаушыларды көру үшін музыка қосыңыз."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Добавьте музыку, чтобы увидеть артистов."
+          }
+        }
+      }
+    },
+    "AI Transcription..." : {
+
+    },
+    "Album" : {
+
+    },
+    "Albums" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Альбомдар"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Альбомы"
+          }
+        }
+      }
+    },
+    "All performers in your library." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кітапханаңыздағы барлық орындаушылар."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Все исполнители в вашей медиатеке."
+          }
+        }
+      }
+    },
+    "Appearance & Language" : {
+
+    },
+    "Are you sure you want to clear your entire library?" : {
+
+    },
+    "Artist" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орындаушы"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Артист"
+          }
+        }
+      }
+    },
+    "Artists" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орындаушылар"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Артисты"
+          }
+        }
+      }
+    },
+    "Aura" : {
+
+    },
+    "Aura Engine DB" : {
+
+    },
+    "Aura Music Database" : {
+
+    },
+    "Automatically curated based on your library." : {
+
+    },
+    "Browse your entire collection." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кітапхананы толық шолу."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Просматривайте всю вашу коллекцию."
+          }
+        }
+      }
+    },
+    "Cancel" : {
+
+    },
+    "Clear All Data" : {
+
+    },
+    "Clear Entire Library" : {
+
+    },
+    "COLUMNS & TYPES" : {
+
+    },
+    "Copy DB Path" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жолды көшіру"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Копировать путь"
+          }
+        }
+      }
+    },
+    "Database Management" : {
+
+    },
+    "Developer" : {
+
+    },
+    "Discovery" : {
+
+    },
+    "Done" : {
+
+    },
+    "Drop Audio Files Here" : {
+
+    },
+    "Duration" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ұзақтығы"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Длительность"
+          }
+        }
+      }
+    },
+    "Enter a SQL query and press Cmd+Enter" : {
+
+    },
+    "Every album you've collected." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Жинағыңыздағы әрбір альбом."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Каждый альбом из вашей коллекции."
+          }
+        }
+      }
+    },
+    "Execute (UPDATE/INSERT)" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орындау (UPDATE/INSERT)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Выполнить (UPDATE/INSERT)"
+          }
+        }
+      }
+    },
+    "Genre" : {
+
+    },
+    "Language" : {
+
+    },
+    "Library" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кітапхана"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Медиатека"
+          }
+        }
+      }
+    },
+    "Lyrics" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Өлең мәтіні"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Текст песни"
+          }
+        }
+      }
+    },
+    "Name" : {
+
+    },
+    "No Albums Found" : {
+
+    },
+    "No Artists Found" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Орындаушылар табылмады"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Артисты не найдены"
+          }
+        }
+      }
+    },
+    "No Lyrics Found" : {
+
+    },
+    "No Results" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нәтиже жоқ"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нет результатов"
+          }
+        }
+      }
+    },
+    "No Selection" : {
+
+    },
+    "No Track Playing" : {
+
+    },
+    "Now Playing" : {
+
+    },
+    "OK" : {
+
+    },
+    "Open Database Console" : {
+
+    },
+    "Parsing ID3 Tags..." : {
+
+    },
+    "Personalize your Aura experience." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aura-ны өзіңізге ыңғайлаңыз."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Персонализируйте вашу Aura."
+          }
+        }
+      }
+    },
+    "Physical SQLite Table Structure" : {
+
+    },
+    "Physical SQLite Tables (Raw)" : {
+
+    },
+    "Playing Next" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Келесі кезекте"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далее в очереди"
+          }
+        }
+      }
+    },
+    "Plays" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тыңдалды"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Слушал"
+          }
+        }
+      }
+    },
+    "Quit" : {
+
+    },
+    "RELATIONSHIPS (FOREIGN KEYS)" : {
+
+    },
+    "Release" : {
+
+    },
+    "Run Query (SELECT)" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Іске қосу (SELECT)"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Запустить (SELECT)"
+          }
+        }
+      }
+    },
+    "Search" : {
+      "comment" : "Search prompt",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Іздеу"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поиск"
+          }
+        }
+      }
+    },
+    "Search or filter data..." : {
+
+    },
+    "Search Results" : {
+
+    },
+    "Searching..." : {
+
+    },
+    "Select an artist or search for music." : {
+
+    },
+    "Select an Item" : {
+
+    },
+    "Settings" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Баптаулар"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Настройки"
+          }
+        }
+      }
+    },
+    "Show Aura" : {
+
+    },
+    "Show Now Playing" : {
+
+    },
+    "Size on Disk" : {
+
+    },
+    "Size: %@" : {
+
+    },
+    "Songs" : {
+
+    },
+    "SQL Console" : {
+
+    },
+    "SQL CONSOLE" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SQL КОНСОЛІ"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SQL КОНСОЛЬ"
+          }
+        }
+      }
+    },
+    "Statistics" : {
+
+    },
+    "Storage" : {
+
+    },
+    "SwiftData Entities (Mapped)" : {
+
+    },
+    "SwiftData SQLite Store" : {
+
+    },
+    "Table Empty" : {
+
+    },
+    "Theme" : {
+
+    },
+    "This action cannot be undone and will delete all stored music files." : {
+
+    },
+    "Title" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Атауы"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название"
+          }
+        }
+      }
+    },
+    "Toggle Inspector" : {
+
+    },
+    "Total song collection." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Барлық өлеңдер жинағы."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Общая коллекция песен."
+          }
+        }
+      }
+    },
+    "Tracks" : {
+      "localizations" : {
+        "kk" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Тректер"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Треки"
+          }
+        }
+      }
+    },
+    "Transcribe with AI" : {
+
+    },
+    "Update Info" : {
+
+    },
+    "Update Info from Web" : {
+
+    },
+    "UUID" : {
+
+    },
+    "Version 1.0.0 (Build 2026)" : {
+
+    },
+    "Your collection is empty." : {
+
+    }
+  },
+  "version" : "1.0"
+}

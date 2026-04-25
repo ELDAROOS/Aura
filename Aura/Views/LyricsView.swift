@@ -6,6 +6,13 @@ struct LyricsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var isTranscribing = false
     @State private var errorMessage: String?
+    @State private var selectedLocale: String = Locale.current.identifier // Default to system
+    
+    let supportedLocales = [
+        ("en-US", "English", "🇺🇸"),
+        ("ru-RU", "Русский", "🇷🇺"),
+        ("kk-KZ", "Қазақ", "🇰🇿")
+    ]
     
     var body: some View {
         ZStack {
@@ -94,21 +101,32 @@ struct LyricsView: View {
                 .foregroundColor(.white.opacity(0.2))
                 .symbolEffect(.variableColor.iterative, isActive: isTranscribing)
             
-            Text(isTranscribing ? "Aura AI is listening..." : "Lyrics not found")
+            Text(isTranscribing ? "AI Transcription..." : "No Lyrics Found")
                 .font(.title2)
                 .bold()
                 .foregroundColor(.white.opacity(0.4))
             
             if !isTranscribing {
-                Button(action: { transcribeTrack() }) {
-                    Label("Transcribe with AI", systemImage: "sparkles")
-                        .font(.headline)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(Capsule().fill(Color.white.opacity(0.2)))
-                        .foregroundColor(.white)
+                VStack(spacing: 12) {
+                    Picker("", selection: $selectedLocale) {
+                        ForEach(supportedLocales, id: \.0) { locale in
+                            Text("\(locale.2) \(locale.1)").tag(locale.0)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    .frame(width: 300)
+                    .colorScheme(.dark)
+                    
+                    Button(action: { transcribeTrack() }) {
+                        Label("Transcribe with AI", systemImage: "sparkles")
+                            .font(.headline)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(Capsule().fill(Color.white.opacity(0.2)))
+                            .foregroundColor(.white)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .buttonStyle(.plain)
             }
             
             if let error = errorMessage {
@@ -133,7 +151,7 @@ struct LyricsView: View {
         
         Task {
             do {
-                let transcription = try await AITranscriptionService.transcribe(url: url)
+                let transcription = try await AITranscriptionService.transcribe(url: url, localeIdentifier: selectedLocale)
                 await MainActor.run {
                     track.lyrics = transcription
                     try? track.modelContext?.save()

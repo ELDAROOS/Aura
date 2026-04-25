@@ -49,86 +49,98 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationSplitView {
-            List(selection: $sidebarSelection) {
-                if searchText.isEmpty {
-                    Section("Discovery") {
-                        ForEach(SmartPlaylistType.allCases) { playlist in
-                            NavigationLink(value: SidebarSelection.playlist(playlist)) {
-                                Label(playlist.rawValue, systemImage: playlist.icon)
+        ZStack {
+            NavigationSplitView {
+                // COLUMN 1: SIDEBAR
+                List(selection: $sidebarSelection) {
+                    if searchText.isEmpty {
+                        Section("Discovery") {
+                            ForEach(SmartPlaylistType.allCases) { playlist in
+                                NavigationLink(value: SidebarSelection.playlist(playlist)) {
+                                    Label(LocalizedStringKey(playlist.rawValue), systemImage: playlist.icon)
+                                }
+                            }
+                        }
+                        
+                        Section("Library") {
+                            ForEach(filteredArtists) { artist in
+                                NavigationLink(value: SidebarSelection.artist(artist)) {
+                                    Label(artist.name, systemImage: "music.mic")
+                                }
+                            }
+                        }
+                    } else {
+                        searchResultsSection
+                    }
+                }
+                .listStyle(SidebarListStyle())
+                .navigationTitle("Aura")
+                .searchable(text: $searchText, placement: .sidebar, prompt: Text("Search", comment: "Search prompt"))
+            } content: {
+                // COLUMN 2: ARTIST/PLAYLIST PROFILE
+                contentView
+            } detail: {
+                // COLUMN 3: SONG LIST
+                detailView
+            }
+            .onDrop(of: [.fileURL], isTargeted: nil) { providers in
+                handleDrop(providers: providers)
+            }
+            .sheet(isPresented: $isSettingsPresented) {
+                SettingsView()
+            }
+            .inspector(isPresented: $isInspectorPresented) {
+                DatabaseInspectorView()
+                    .inspectorColumnWidth(min: 200, ideal: 250, max: 300)
+            }
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button(action: { isFileImporterPresented.toggle() }) {
+                        Label("Add Music", systemImage: "plus")
+                    }
+                }
+                ToolbarItem {
+                    Button(action: { isInspectorPresented.toggle() }) {
+                        Label("Toggle Inspector", systemImage: "info.circle")
+                    }
+                }
+                ToolbarItem {
+                    Button(action: { isSettingsPresented.toggle() }) {
+                        Label("Settings", systemImage: "gearshape")
+                    }
+                }
+            }
+            .fileImporter(
+                isPresented: $isFileImporterPresented,
+                allowedContentTypes: [.audio, .mp3, .mpeg4Audio],
+                allowsMultipleSelection: true
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    Task {
+                        for url in urls {
+                            if url.startAccessingSecurityScopedResource() {
+                                try? await MetadataParser.parseID3Tags(from: url, context: modelContext)
+                                url.stopAccessingSecurityScopedResource()
                             }
                         }
                     }
-                    
-                    Section("Library") {
-                        ForEach(filteredArtists) { artist in
-                            NavigationLink(value: SidebarSelection.artist(artist)) {
-                                Label(artist.name, systemImage: "music.mic")
-                            }
-                        }
-                    }
-                } else {
-                    searchResultsSection
+                case .failure(let error):
+                    print("Error picking files: \(error.localizedDescription)")
                 }
             }
-            .navigationTitle("Aura")
-            .searchable(text: $searchText, placement: .sidebar, prompt: "Artists, Songs...")
-        } content: {
-            contentView
-        } detail: {
-            detailView
-        }
-        .onDrop(of: [.fileURL], isTargeted: nil) { providers in
-            handleDrop(providers: providers)
-        }
-        .sheet(isPresented: $isSettingsPresented) {
-            SettingsView()
-        }
-        .inspector(isPresented: $isInspectorPresented) {
-            DatabaseInspectorView()
-                .inspectorColumnWidth(min: 200, ideal: 250, max: 300)
-        }
-        .toolbar {
-            ToolbarItem {
-                Button(action: { isFileImporterPresented.toggle() }) {
-                    Label("Add Music", systemImage: "plus")
-                }
-                .help("Add music to your library")
+            .safeAreaInset(edge: .bottom) {
+                MiniPlayerView()
             }
-            ToolbarItem {
-                Button(action: { isInspectorPresented.toggle() }) {
-                    Label("Toggle Inspector", systemImage: "info.circle")
-                }
-            }
-            ToolbarItem {
-                Button(action: { isSettingsPresented.toggle() }) {
-                    Label("Settings", systemImage: "gearshape")
-                }
+            
+            // Full Screen Now Playing Overlay
+            if audioPlayer.isNowPlayingVisible {
+                NowPlayingView()
+                    .transition(.move(edge: .bottom))
+                    .zIndex(100)
             }
         }
-        .fileImporter(
-            isPresented: $isFileImporterPresented,
-            allowedContentTypes: [.audio, .mp3, .mpeg4Audio],
-            allowsMultipleSelection: true
-        ) { result in
-            switch result {
-            case .success(let urls):
-                Task {
-                    for url in urls {
-                        // Start accessing security-scoped resource if needed
-                        if url.startAccessingSecurityScopedResource() {
-                            try? await MetadataParser.parseID3Tags(from: url, context: modelContext)
-                            url.stopAccessingSecurityScopedResource()
-                        }
-                    }
-                }
-            case .failure(let error):
-                print("Error picking files: \(error.localizedDescription)")
-            }
-        }
-        .safeAreaInset(edge: .bottom) {
-            MiniPlayerView()
-        }
+        .animation(.spring(response: 0.5, dampingFraction: 0.8), value: audioPlayer.isNowPlayingVisible)
     }
     
     @ViewBuilder
@@ -161,22 +173,13 @@ struct ContentView: View {
     
     @ViewBuilder
     private var contentView: some View {
-        if !searchText.isEmpty {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Searching for \"\(searchText)\"")
-                    .font(.largeTitle).bold()
-                Text("Found \(filteredArtists.count) artists and \(filteredTracks.count) songs.")
-                    .foregroundColor(.secondary)
-                Divider()
-            }
-            .padding()
-        } else if let sidebarSelection {
+        if let sidebarSelection {
             switch sidebarSelection {
             case .artist(let artist):
                 ArtistDetailView(artist: artist)
             case .playlist(let playlist):
                 VStack(alignment: .leading, spacing: 10) {
-                    Label(playlist.rawValue, systemImage: playlist.icon)
+                    Label(LocalizedStringKey(playlist.rawValue), systemImage: playlist.icon)
                         .font(.largeTitle).bold()
                     Text("Automatically curated based on your library.")
                         .foregroundColor(.secondary)
@@ -185,8 +188,9 @@ struct ContentView: View {
                 .padding()
             }
         } else {
-            Text("Select an item")
-                .foregroundStyle(.secondary)
+            Text("Aura")
+                .font(.largeTitle)
+                .foregroundColor(.secondary)
         }
     }
     

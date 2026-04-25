@@ -5,84 +5,94 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     
+    @AppStorage("app_language") private var appLanguage: String = "system"
+    @AppStorage("app_theme") private var appTheme: String = "system"
     @State private var showingConfirmation = false
     @State private var showingConsole = false
     
+    let languages = [
+        ("system", "System Default", "🖥️"),
+        ("en", "English", "🇺🇸"),
+        ("ru", "Русский", "🇷🇺"),
+        ("kk", "Қазақ", "🇰🇿")
+    ]
+    
+    let themes = [
+        ("system", "System", "🖥️"),
+        ("light", "Light", "☀️"),
+        ("dark", "Dark", "🌙")
+    ]
+    
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 0) {
+            // macOS-style Header
             HStack {
                 Text("Settings")
-                    .font(.title2)
-                    .bold()
+                    .font(.headline)
                 Spacer()
-                Button(action: { dismiss() }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(.secondary)
-                        .font(.title3)
-                }
-                .buttonStyle(.plain)
-            }
-            
-            Divider()
-            
-            VStack(alignment: .leading, spacing: 15) {
-                Text("Developer Tools")
-                    .font(.headline)
-                
-                Button(action: { showingConsole = true }) {
-                    HStack {
-                        Image(systemName: "terminal.fill")
-                        Text("Open Database Console")
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(10)
-                    .background(Color.accentColor.opacity(0.1))
-                    .cornerRadius(8)
-                }
-                .buttonStyle(.plain)
-                .sheet(isPresented: $showingConsole) {
-                    DatabaseConsoleView()
-                        .frame(minWidth: 800, minHeight: 600)
-                }
-                
-                Divider().padding(.vertical, 5)
-                
-                Text("Database Management")
-                    .font(.headline)
-                
-                Text("This will permanently remove all artists, albums, tracks and physical audio files from your library.")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-                
-                Button(role: .destructive) {
-                    showingConfirmation = true
-                } label: {
-                    HStack {
-                        Image(systemName: "trash.fill")
-                        Text("Clear Entire Library")
-                    }
-                    .padding(.horizontal, 8)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
+                Button("Done") { dismiss() }
+                    .keyboardShortcut(.return, modifiers: .command)
             }
             .padding()
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.secondary.opacity(0.1))
-            .cornerRadius(12)
+            .background(.ultraThinMaterial)
             
-            Spacer()
-            
-            Text("Aura Music Database v1.0")
-                .font(.caption)
-                .foregroundColor(.secondary)
+            Form {
+                Section("Appearance & Language") {
+                    Picker(selection: $appLanguage) {
+                        ForEach(languages, id: \.0) { lang in
+                            Text("\(lang.2) \(lang.1)").tag(lang.0)
+                        }
+                    } label: {
+                        Label("Language", systemImage: "globe")
+                    }
+                    
+                    Picker(selection: $appTheme) {
+                        ForEach(themes, id: \.0) { theme in
+                            Text("\(theme.2) \(theme.1)").tag(theme.0)
+                        }
+                    } label: {
+                        Label("Theme", systemImage: "paintbrush.fill")
+                    }
+                }
+                
+                Section("Developer") {
+                    Button(action: { showingConsole = true }) {
+                        Label("Open Database Console", systemImage: "terminal.fill")
+                    }
+                    .buttonStyle(.link)
+                    .sheet(isPresented: $showingConsole) {
+                        DatabaseConsoleView()
+                            .frame(minWidth: 800, minHeight: 600)
+                    }
+                }
+                
+                Section(header: Text("Database Management"), footer: Text("This action cannot be undone and will delete all stored music files.")) {
+                    Button(role: .destructive) {
+                        showingConfirmation = true
+                    } label: {
+                        Label("Clear Entire Library", systemImage: "trash.fill")
+                            .foregroundColor(.red)
+                    }
+                }
+                
+                Section {
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 4) {
+                            Text("Aura Music Database")
+                                .font(.caption.bold())
+                            Text("Version 1.0.0 (Build 2026)")
+                                .font(.caption2)
+                                .foregroundColor(.secondary)
+                        }
+                        Spacer()
+                    }
+                    .padding(.vertical, 10)
+                }
+            }
+            .formStyle(.grouped)
         }
-        .padding(24)
-        .frame(width: 450, height: 450)
+        .frame(width: 480, height: 420)
         .confirmationDialog("Are you sure you want to clear your entire library?", isPresented: $showingConfirmation) {
             Button("Clear All Data", role: .destructive) {
                 clearLibrary()
@@ -95,18 +105,15 @@ struct SettingsView: View {
     
     private func clearLibrary() {
         do {
-            // Delete all entities
             try modelContext.delete(model: Artist.self)
             try modelContext.delete(model: Album.self)
             try modelContext.delete(model: Track.self)
             try modelContext.delete(model: Playlist.self)
             try modelContext.delete(model: UserActivity.self)
             
-            // Delete local files
             let documentsDir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
             let files = try FileManager.default.contentsOfDirectory(at: documentsDir, includingPropertiesForKeys: nil)
             for file in files {
-                // Avoid deleting the SQLite database itself while the context is active
                 let fileName = file.lastPathComponent
                 if !fileName.contains("default.store") && !fileName.contains("sqlite") {
                     try? FileManager.default.removeItem(at: file)
