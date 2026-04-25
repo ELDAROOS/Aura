@@ -1,4 +1,4 @@
-# Xcode & SwiftUI
+# Xcode
 #
 build/
 DerivedData/
@@ -13,20 +13,22 @@ DerivedData/
 xcuserdata/
 *.xccheckout
 *.moved-aside
-DerivedData
+*.xcuserstate
+*.xcscmblueprint
 *.hmap
 *.ipa
-*.xcuserstate
+*.playground
 
 # Swift Package Manager
 #
 .build/
+.swiftpm/
+Packages/
+Package.resolved
 
-# macOS (System files)
+# macOS System Files
 #
 .DS_Store
-*.swp
-*~.nib
 .AppleDouble
 .LSOverride
 Icon
@@ -34,17 +36,29 @@ Icon
 .Spotlight-V100
 .Trashes
 
-# Database files (CRITICAL: prevent leaking user data)
+# Database & Storage
 #
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
 *.db
+*.store
+*.store-shm
+*.store-wal
 
-# Build Artifacts (Keep these for Releases only, don't put in git)
+# Build Artifacts & Distributions
 #
 build_output/
 *.zip
 *.dmg
 *.app
 *.pkg
+*.appex
+
+# Miscellaneous
+#
+*.swp
+*~.nib
+*.lock
+.env
+.env.*

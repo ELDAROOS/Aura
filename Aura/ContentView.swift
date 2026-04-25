@@ -11,6 +11,7 @@ struct ContentView: View {
     @State private var isInspectorPresented = false
     @State private var isSettingsPresented = false
     @State private var isFileImporterPresented = false
+    @State private var isImportPresented = false
     @State private var searchText = ""
     
     enum SidebarSelection: Hashable {
@@ -66,6 +67,12 @@ struct ContentView: View {
                                     Label(LocalizedStringKey(playlist.rawValue), systemImage: playlist.icon)
                                 }
                             }
+                            
+                            Button(action: { isImportPresented.toggle() }) {
+                                Label("Import from Link", systemImage: "link.badge.plus")
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.vertical, 4)
                         }
                         
                         Section("Library") {
@@ -98,6 +105,9 @@ struct ContentView: View {
             }
             .sheet(isPresented: $isSettingsPresented) {
                 SettingsView()
+            }
+            .sheet(isPresented: $isImportPresented) {
+                ImportView()
             }
             .inspector(isPresented: $isInspectorPresented) {
                 DatabaseInspectorView()

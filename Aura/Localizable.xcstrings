@@ -277,6 +277,15 @@
     "Home" : {
 
     },
+    "https://..." : {
+
+    },
+    "Import from Link" : {
+
+    },
+    "Import Music" : {
+
+    },
     "Language" : {
 
     },
@@ -378,6 +387,9 @@
 
     },
     "Parsing ID3 Tags..." : {
+
+    },
+    "Paste a Spotify or YouTube link below" : {
 
     },
     "Personalize your Aura experience." : {
@@ -548,10 +560,16 @@
         }
       }
     },
+    "Start Import" : {
+
+    },
     "Statistics" : {
 
     },
     "Storage" : {
+
+    },
+    "Supports Spotify tracks/playlists and YouTube videos/playlists." : {
 
     },
     "SwiftData Entities (Mapped)" : {

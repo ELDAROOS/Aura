@@ -1,31 +1,55 @@
-# Aura: The AI-Powered Music Engine for macOS 🎧
+# Aura: The Native Music Engine for macOS 🎧
+
+Aura — это премиальный музыкальный плеер и менеджер медиатеки для macOS, созданный на SwiftUI и SwiftData. Вдохновленный эстетикой Apple Music, он сочетает в себе кристально чистый интерфейс, мощные инструменты управления базой данных и продвинутые функции импорта.
 
 ---
 
-## 🌌 Overview
-**Aura** is a premium, native music management system for macOS, built from the ground up using **SwiftUI** and **SwiftData**. It bridges the gap between a high-fidelity audio player and a powerful database management tool, all wrapped in a stunning, Apple-inspired glassmorphic interface.
+## 🌌 Основные возможности
 
-## ✨ Core Features
-*   **🤖 AI-Driven Lyrics:** Leverage on-device Machine Learning to transcribe lyrics in real-time. Supports multi-language recognition (English, Russian, and more) using Apple's Speech framework.
-*   **💻 Hardcore SQL Console:** For the power users. A built-in SQLite inspector that allows you to run raw SQL queries directly on your music library. Browse physical tables like `ZTRACK` and `ZARTIST` with zero abstraction.
-*   **💎 Premium Aesthetics:** Designed according to Apple's Human Interface Guidelines. Features dynamic blurring, vibrancy effects, and micro-animations that make the UI feel alive.
-*   **🎼 Seamless Playback:** Native audio engine with interactive seek bars, volume control, and metadata parsing for a flawless listening experience.
-*   **☁️ Metadata Sync:** Automatically fetches high-resolution album art and artist info from global databases to keep your library looking pristine.
-*   **🔘 Menu Bar Extra:** A discreet mini-player residing in your macOS menu bar for quick control without breaking your workflow.
+### 💎 Премиальный дизайн
+*   **Иммерсивный "Now Playing":** Полноэкранный плеер с живым, анимированным фоном (Mesh Gradient), который переливается в такт обложке альбома.
+*   **Три колонки управления:** Классическая навигация Apple Style: Боковая панель -> Профиль артиста -> Список песен.
+*   **Гибкие настройки вида:** Переключайся между классическим списком и современными плитками (кейсами) для артистов и альбомов.
 
-## 🛠 Technical Stack
-*   **Language:** Swift 6
-*   **UI Framework:** SwiftUI (Native macOS)
-*   **Persistence:** SwiftData / SQLite
-*   **Audio:** AVFoundation
-*   **AI/ML:** Apple Speech Framework
+### 📥 Мощный импорт (YouTube & Spotify Bridge)
+*   **Загрузка по ссылке:** Вставь ссылку на видео или плейлист из YouTube/YouTube Music, и Aura скачает их в лучшем качестве с метаданными.
+*   **Spotify Integration:** Умный мост, который находит твои любимые треки и плейлисты из Spotify на YouTube и автоматически добавляет их в библиотеку.
+*   **Drag & Drop:** Просто перетащи свои MP3-файлы в окно приложения для мгновенного анализа тегов.
+
+### 🤖 AI и тексты песен
+*   **AI Транскрибация:** Распознавание текста песен на лету с помощью Apple Speech Framework. Поддержка русского, английского и казахского языков.
+*   **Караоке-режим:** Красивое отображение текстов поверх размытой обложки.
+
+### ⚙️ Тонкая настройка
+*   **Локализация:** Полная поддержка Русского, Казахского и Английского языков с возможностью ручного переключения.
+*   **Темы:** Поддержка системной, светлой и темной тем.
+*   **SQL Консоль:** Прямой доступ к базе данных SQLite для продвинутых пользователей.
+
+---
+
+## 🛠 Технический стек
+*   **Язык:** Swift 6.0+
+*   **UI:** SwiftUI (macOS Native)
+*   **База данных:** SwiftData
+*   **Движок загрузки:** yt-dlp & FFmpeg
+*   **Аудио:** AVFoundation
 
 ---
 
-## 🚀 Installation
-1.  Download the latest **Aura.dmg** from the [Releases](https://github.com/ELDAROOS/Aura/releases) section.
-2.  Open the DMG and drag **Aura** to your Applications folder.
-3.  Launch and drop your favorite music files!
+## 🚀 Установка и настройка
+
+### 1. Системные требования
+Для работы функции скачивания музыки необходимо установить `yt-dlp` и `ffmpeg` через Homebrew:
+```bash
+brew install yt-dlp ffmpeg
+```
+
+### 2. Сборка из исходников
+Для корректной работы всех функций (включая скачивание) необходимо **отключить App Sandbox** в настройках проекта Xcode:
+1. Открой `Aura.xcodeproj`.
+2. Перейди в **Signing & Capabilities**.
+3. Удали пункт **App Sandbox**.
 
 ---
-*Created with ❤️ by Eldar*
+
+*Создано с ❤️ Елдаром (ELDAROOS)*
