@@ -102,10 +102,34 @@ struct ArtistDetailView: View {
                 }
                 
                 Divider()
+                
+                // Tracks Section
+                VStack(alignment: .leading, spacing: 16) {
+                    Text("Top Songs")
+                        .font(.title3)
+                        .bold()
+                    
+                    let tracks = (artist.albums ?? []).flatMap { $0.tracks ?? [] }
+                    
+                    if tracks.isEmpty {
+                        Text("No tracks found.")
+                            .foregroundColor(.secondary)
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(tracks) { track in
+                                TrackRow(track: track)
+                                if track != tracks.last {
+                                    Divider().padding(.leading, 40)
+                                }
+                            }
+                        }
+                    }
+                }
             }
             .padding(32)
         }
         .background(Color(NSColor.windowBackgroundColor))
+
         .alert("Update Info", isPresented: $showAlert) {
             Button("OK", role: .cancel) { }
         } message: {
@@ -113,3 +137,51 @@ struct ArtistDetailView: View {
         }
     }
 }
+
+struct TrackRow: View {
+    let track: Track
+    @Bindable var audioPlayer = AudioPlayerService.shared
+    
+    var body: some View {
+        Button(action: { audioPlayer.play(track: track) }) {
+            HStack(spacing: 12) {
+                if let artData = track.album?.coverArt, let img = NSImage(data: artData) {
+                    Image(nsImage: img)
+                        .resizable()
+                        .frame(width: 32, height: 32)
+                        .cornerRadius(4)
+                } else {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color.secondary.opacity(0.1))
+                        .frame(width: 32, height: 32)
+                        .overlay(Image(systemName: "music.note").font(.caption))
+                }
+                
+                VStack(alignment: .leading) {
+                    Text(track.title)
+                        .font(.system(size: 13, weight: .medium))
+                    Text(track.album?.title ?? "Unknown Album")
+                        .font(.system(size: 11))
+                        .foregroundColor(.secondary)
+                }
+                
+                Spacer()
+                
+                Text(formatTime(TimeInterval(track.duration)))
+                    .font(.system(size: 11, design: .monospaced))
+                    .foregroundColor(.secondary)
+            }
+            .padding(.vertical, 8)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+    
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
+}
+
+

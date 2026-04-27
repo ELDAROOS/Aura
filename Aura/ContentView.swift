@@ -93,12 +93,9 @@ struct ContentView: View {
                 .listStyle(SidebarListStyle())
                 .navigationTitle("Aura")
                 .searchable(text: $searchText, placement: .sidebar, prompt: Text("Search", comment: "Search prompt"))
-            } content: {
-                // COLUMN 2: ARTIST/PLAYLIST PROFILE
-                contentView
             } detail: {
-                // COLUMN 3: SONG LIST
-                detailView
+                // COLUMN 2: MAIN CONTENT (Merged)
+                mainDetailView
             }
             .onDrop(of: [.fileURL], isTargeted: nil) { providers in
                 handleDrop(providers: providers)
@@ -197,7 +194,7 @@ struct ContentView: View {
     }
     
     @ViewBuilder
-    private var contentView: some View {
+    private var mainDetailView: some View {
         if let sidebarSelection {
             switch sidebarSelection {
             case .home:
@@ -207,47 +204,34 @@ struct ContentView: View {
             case .artist(let artist):
                 ArtistDetailView(artist: artist)
             case .playlist(let playlist):
-                VStack(alignment: .leading, spacing: 10) {
-                    Label(LocalizedStringKey(playlist.rawValue), systemImage: playlist.icon)
-                        .font(.largeTitle).bold()
-                    Text("Automatically curated based on your library.")
-                        .foregroundColor(.secondary)
-                    Divider()
-                }
-                .padding()
-            }
-        } else {
-            Text("Aura")
-                .font(.largeTitle)
-                .foregroundColor(.secondary)
-        }
-    }
-    
-    @ViewBuilder
-    private var detailView: some View {
-        if !searchText.isEmpty {
-            TrackListView(tracks: filteredTracks)
-        } else if let sidebarSelection {
-            switch sidebarSelection {
-            case .home:
-                EmptyView() 
-            case .artistList:
-                EmptyView()
-            case .artist(let artist):
-                if let albums = artist.albums {
-                    let tracks = albums.flatMap { $0.tracks ?? [] }
-                    TrackListView(tracks: tracks)
-                }
-            case .playlist(let playlist):
                 let smartTracks = getSmartTracks(for: playlist)
-                TrackListView(tracks: smartTracks)
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 20) {
+                        Image(systemName: playlist.icon)
+                            .font(.system(size: 60))
+                            .foregroundColor(.accentColor)
+                            .frame(width: 120, height: 120)
+                            .background(RoundedRectangle(cornerRadius: 15).fill(Color.accentColor.opacity(0.1)))
+                        
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(LocalizedStringKey(playlist.rawValue))
+                                .font(.system(size: 34, weight: .bold))
+                            Text("Automatically curated based on your library.")
+                                .foregroundColor(.secondary)
+                        }
+                    }
+                    .padding(30)
+                    
+                    TrackListView(tracks: smartTracks)
+                }
             }
         } else {
-            ContentUnavailableView("No Selection", systemImage: "music.note.list", description: Text("Select an artist or search for music."))
+            ContentUnavailableView("Welcome to Aura", systemImage: "music.note", description: Text("Select something from the sidebar to start listening."))
         }
     }
     
     private func handleDrop(providers: [NSItemProvider]) -> Bool {
+
         Task {
             for provider in providers {
                 if let item = try? await provider.loadItem(forTypeIdentifier: "public.file-url", options: nil) as? URL {

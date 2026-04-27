@@ -12,6 +12,7 @@ struct SettingsView: View {
     @State private var showingConsole = false
     @State private var showingEqualizer = false
     @State private var showingDuplicates = false
+    @State private var showingAbout = false
     @Query private var allTracks: [Track]
     
     let languages = [
@@ -114,16 +115,22 @@ struct SettingsView: View {
                 }
                 
                 Section {
-                    HStack {
-                        Spacer()
-                        VStack(spacing: 4) {
-                            Text("Aura Music Database")
-                                .font(.caption.bold())
-                            Text("Version 1.0.0 (Build 2026)")
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                    Button(action: { showingAbout = true }) {
+                        HStack {
+                            Spacer()
+                            VStack(spacing: 4) {
+                                Text("Aura Music Database")
+                                    .font(.caption.bold())
+                                Text("Version 1.0.0 (Build 2026)")
+                                    .font(.caption2)
+                                    .foregroundColor(.secondary)
+                            }
+                            Spacer()
                         }
-                        Spacer()
+                    }
+                    .buttonStyle(.plain)
+                    .sheet(isPresented: $showingAbout) {
+                        AboutView()
                     }
                     .padding(.vertical, 10)
                 }

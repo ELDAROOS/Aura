@@ -2,6 +2,7 @@ import Foundation
 import AVFoundation
 import SwiftUI
 import SwiftData
+import MediaPlayer
 
 @Observable
 class AudioPlayerService: NSObject {
@@ -35,6 +36,7 @@ class AudioPlayerService: NSObject {
     private override init() {
         super.init()
         setupEngine()
+        setupRemoteCommandCenter()
     }
     
     private func setupEngine() {
@@ -55,6 +57,49 @@ class AudioPlayerService: NSObject {
         engine.connect(eqNode, to: engine.mainMixerNode, format: format)
         
         try? engine.start()
+    }
+    
+    private func setupRemoteCommandCenter() {
+        let commandCenter = MPRemoteCommandCenter.shared()
+        
+        commandCenter.playCommand.addTarget { [unowned self] _ in
+            self.togglePlayPause()
+            return .success
+        }
+        
+        commandCenter.pauseCommand.addTarget { [unowned self] _ in
+            self.togglePlayPause()
+            return .success
+        }
+        
+        commandCenter.nextTrackCommand.addTarget { [unowned self] _ in
+            self.nextTrack()
+            return .success
+        }
+        
+        commandCenter.previousTrackCommand.addTarget { [unowned self] _ in
+            self.previousTrack()
+            return .success
+        }
+    }
+    
+    private func updateNowPlayingInfo() {
+        guard let track = currentTrack else { return }
+        
+        var nowPlayingInfo = [String: Any]()
+        nowPlayingInfo[MPMediaItemPropertyTitle] = track.title
+        nowPlayingInfo[MPMediaItemPropertyArtist] = track.album?.artist?.name ?? "Unknown Artist"
+        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
+        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = duration
+        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? 1.0 : 0.0
+        
+        if let artData = track.album?.coverArt, let image = NSImage(data: artData) {
+            nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in
+                return image
+            }
+        }
+        
+        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
     }
     
     private func updateEQ() {
@@ -98,6 +143,7 @@ class AudioPlayerService: NSObject {
             
             currentTrack = track
             isPlaying = true
+            updateNowPlayingInfo()
             startTimer()
         } catch {
             print("Playback Error: \(error.localizedDescription)")
@@ -111,6 +157,7 @@ class AudioPlayerService: NSObject {
             playerNode.play()
         }
         isPlaying.toggle()
+        updateNowPlayingInfo()
     }
     
     func stop() {
@@ -118,6 +165,7 @@ class AudioPlayerService: NSObject {
         isPlaying = false
         timer?.invalidate()
         currentTime = 0
+        updateNowPlayingInfo()
     }
     
     func nextTrack() {
@@ -130,7 +178,7 @@ class AudioPlayerService: NSObject {
     
     private func startTimer() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
             guard let self = self, self.isPlaying else { return }
             
             if let lastRenderTime = self.playerNode.lastRenderTime,
@@ -139,6 +187,10 @@ class AudioPlayerService: NSObject {
                 let sampleRate = playerTime.sampleRate
                 if sampleRate > 0 {
                     self.currentTime = sampleTime / sampleRate
+                    // Update system info only occasionally to save resources
+                    if Int(self.currentTime) % 5 == 0 {
+                        self.updateNowPlayingInfo()
+                    }
                 }
             }
         }
@@ -146,6 +198,7 @@ class AudioPlayerService: NSObject {
     
     func seek(to time: TimeInterval) {
         self.currentTime = time
+        updateNowPlayingInfo()
     }
     
     var timeString: String { formatTime(currentTime) }

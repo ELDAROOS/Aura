@@ -222,6 +222,9 @@
         }
       }
     },
+    "Created with ❤️ by" : {
+
+    },
     "Crossfade (5s)" : {
 
     },
@@ -258,6 +261,9 @@
           }
         }
       }
+    },
+    "ELDAROOS" : {
+
     },
     "Enter a SQL query and press Cmd+Enter" : {
 
@@ -413,10 +419,10 @@
         }
       }
     },
-    "No Selection" : {
+    "No Track Playing" : {
 
     },
-    "No Track Playing" : {
+    "No tracks found." : {
 
     },
     "Now Playing" : {
@@ -546,10 +552,10 @@
     "Searching..." : {
 
     },
-    "Select an artist or search for music." : {
+    "Select an Item" : {
 
     },
-    "Select an Item" : {
+    "Select something from the sidebar to start listening." : {
 
     },
     "Settings" : {
@@ -623,6 +629,9 @@
     "Table Empty" : {
 
     },
+    "The Native Music Engine for macOS.\nBuilt using SwiftUI & SwiftData." : {
+
+    },
     "Theme" : {
 
     },
@@ -646,6 +655,9 @@
       }
     },
     "Toggle Inspector" : {
+
+    },
+    "Top Songs" : {
 
     },
     "Total song collection." : {
@@ -694,6 +706,12 @@
 
     },
     "Version 1.0.0 (Build 2026)" : {
+
+    },
+    "Version 1.0.0 (Genesis)" : {
+
+    },
+    "Welcome to Aura" : {
 
     },
     "Your collection is empty." : {
