@@ -1,11 +1,14 @@
 import SwiftUI
+import AppKit
 
 struct MenuBarView: View {
-    @Bindable var audioPlayer = AudioPlayerService.shared
+    private var audioPlayer: AudioPlayerService { AudioPlayerService.shared }
     
     var body: some View {
+        @Bindable var player = AudioPlayerService.shared
+        
         VStack(spacing: 16) {
-            if let track = audioPlayer.currentTrack {
+            if let track = player.currentTrack {
                 // Track Info
                 HStack(spacing: 12) {
                     ZStack {
@@ -34,18 +37,18 @@ struct MenuBarView: View {
                 
                 // Controls
                 HStack(spacing: 20) {
-                    Button(action: { audioPlayer.previousTrack() }) {
+                    Button(action: { player.previousTrack() }) {
                         Image(systemName: "backward.fill")
                     }
                     .buttonStyle(.plain)
                     
-                    Button(action: { audioPlayer.togglePlayPause() }) {
-                        Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                    Button(action: { player.togglePlayPause() }) {
+                        Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
                             .font(.system(size: 24))
                     }
                     .buttonStyle(.plain)
                     
-                    Button(action: { audioPlayer.nextTrack() }) {
+                    Button(action: { player.nextTrack() }) {
                         Image(systemName: "forward.fill")
                     }
                     .buttonStyle(.plain)
@@ -56,7 +59,7 @@ struct MenuBarView: View {
                     Image(systemName: "speaker.fill")
                         .font(.system(size: 10))
                         .foregroundColor(.secondary)
-                    Slider(value: $audioPlayer.volume, in: 0...1)
+                    Slider(value: $player.volume, in: 0...1)
                         .controlSize(.mini)
                     Image(systemName: "speaker.wave.2.fill")
                         .font(.system(size: 10))

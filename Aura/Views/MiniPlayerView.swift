@@ -1,26 +1,28 @@
 import SwiftUI
 
 struct MiniPlayerView: View {
-    @Bindable var audioPlayer = AudioPlayerService.shared
+    private var audioPlayer: AudioPlayerService { AudioPlayerService.shared }
     @State private var showingLyrics = false
     @State private var showingQueue = false
     
     var body: some View {
-        if let track = audioPlayer.currentTrack {
+        @Bindable var player = AudioPlayerService.shared
+        
+        if let track = player.currentTrack {
             VStack(spacing: 0) {
                 // Interactive Progress Slider
                 VStack(spacing: -8) {
                     Slider(value: Binding(
-                        get: { audioPlayer.currentTime },
-                        set: { audioPlayer.seek(to: $0) }
-                    ), in: 0...(audioPlayer.duration > 0 ? audioPlayer.duration : 1))
+                        get: { player.currentTime },
+                        set: { player.seek(to: $0) }
+                    ), in: 0...(player.duration > 0 ? player.duration : 1))
                     .controlSize(.small)
                     .accentColor(.accentColor)
                     
                     HStack {
-                        Text(audioPlayer.timeString)
+                        Text(player.timeString)
                         Spacer()
-                        Text(audioPlayer.totalTimeString)
+                        Text(player.totalTimeString)
                     }
                     .font(.system(size: 9, weight: .bold))
                     .foregroundColor(.secondary)
@@ -33,7 +35,7 @@ struct MiniPlayerView: View {
                 HStack(spacing: 0) {
                     // Left Side: Artwork & Metadata
                     HStack(spacing: 12) {
-                        Button(action: { audioPlayer.isNowPlayingVisible = true }) {
+                        Button(action: { player.isNowPlayingVisible = true }) {
                             ZStack {
                                 if let coverArt = track.album?.coverArt, let nsImage = NSImage(data: coverArt) {
                                     Image(nsImage: nsImage)
@@ -69,42 +71,42 @@ struct MiniPlayerView: View {
                     
                     // Center: Playback Controls
                     HStack(spacing: 24) {
-                        Button(action: { audioPlayer.isShuffle.toggle() }) {
+                        Button(action: { player.isShuffle.toggle() }) {
                             Image(systemName: "shuffle")
                                 .font(.system(size: 14))
-                                .foregroundColor(audioPlayer.isShuffle ? .accentColor : .secondary)
+                                .foregroundColor(player.isShuffle ? .accentColor : .secondary)
                         }
                         .buttonStyle(PlainButtonStyle())
                         
-                        Button(action: { audioPlayer.previousTrack() }) {
+                        Button(action: { player.previousTrack() }) {
                             Image(systemName: "backward.fill")
                                 .font(.system(size: 18))
                         }
                         .buttonStyle(PlainButtonStyle())
                         .foregroundColor(.primary.opacity(0.8))
                         
-                        Button(action: { audioPlayer.togglePlayPause() }) {
+                        Button(action: { player.togglePlayPause() }) {
                             ZStack {
                                 Circle()
                                     .fill(Color.primary.opacity(0.05))
                                     .frame(width: 40, height: 40)
                                 
-                                Image(systemName: audioPlayer.isPlaying ? "pause.fill" : "play.fill")
+                                Image(systemName: player.isPlaying ? "pause.fill" : "play.fill")
                                     .font(.system(size: 20))
-                                    .offset(x: audioPlayer.isPlaying ? 0 : 1)
+                                    .offset(x: player.isPlaying ? 0 : 1)
                             }
                         }
                         .buttonStyle(PlainButtonStyle())
                         .foregroundColor(.primary)
                         
-                        Button(action: { audioPlayer.nextTrack() }) {
+                        Button(action: { player.nextTrack() }) {
                             Image(systemName: "forward.fill")
                                 .font(.system(size: 18))
                         }
                         .buttonStyle(PlainButtonStyle())
                         .foregroundColor(.primary.opacity(0.8))
                         
-                        Button(action: { /* Repeat logic could go here */ }) {
+                        Button(action: { /* Repeat logic */ }) {
                             Image(systemName: "repeat")
                                 .font(.system(size: 14))
                                 .foregroundColor(.secondary)
@@ -116,11 +118,11 @@ struct MiniPlayerView: View {
                     
                     // Right Side: Volume & Extra Controls
                     HStack(spacing: 15) {
-                        Image(systemName: audioPlayer.volume == 0 ? "speaker.slash.fill" : "speaker.fill")
+                        Image(systemName: player.volume == 0 ? "speaker.slash.fill" : "speaker.fill")
                             .font(.system(size: 10))
                             .foregroundColor(.secondary)
                         
-                        Slider(value: $audioPlayer.volume, in: 0...1)
+                        Slider(value: $player.volume, in: 0...1)
                             .controlSize(.mini)
                             .frame(width: 80)
                             .accentColor(.secondary)
@@ -152,7 +154,7 @@ struct MiniPlayerView: View {
                                     .padding()
                                 
                                 List {
-                                    ForEach(audioPlayer.queue, id: \.uuid) { queueTrack in
+                                    ForEach(player.queue, id: \.uuid) { queueTrack in
                                         HStack {
                                             if let cover = queueTrack.album?.coverArt, let img = NSImage(data: cover) {
                                                 Image(nsImage: img)
@@ -174,7 +176,6 @@ struct MiniPlayerView: View {
                                             if queueTrack.uuid == track.uuid {
                                                 Image(systemName: "waveform")
                                                     .foregroundColor(.accentColor)
-                                                    .symbolEffect(.variableColor.iterative, isActive: audioPlayer.isPlaying)
                                             }
                                         }
                                         .padding(.vertical, 2)
@@ -192,24 +193,5 @@ struct MiniPlayerView: View {
             .background(VisualEffectView(material: .contentBackground, blendingMode: .withinWindow))
             .overlay(Divider(), alignment: .top)
         }
-    }
-}
-
-// macOS Vibrancy Support
-struct VisualEffectView: NSViewRepresentable {
-    var material: NSVisualEffectView.Material
-    var blendingMode: NSVisualEffectView.BlendingMode
-
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = material
-        view.blendingMode = blendingMode
-        view.state = .active
-        return view
-    }
-
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        nsView.material = material
-        nsView.blendingMode = blendingMode
     }
 }

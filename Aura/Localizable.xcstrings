@@ -23,6 +23,9 @@
     "%lld items" : {
 
     },
+    "%llddB" : {
+
+    },
     "⌘A" : {
 
     },
@@ -63,6 +66,12 @@
           }
         }
       }
+    },
+    "Adjust individual bands to fine-tune your sound." : {
+
+    },
+    "AI Discovery" : {
+
     },
     "AI Transcription..." : {
 
@@ -144,6 +153,9 @@
     "Artists Style" : {
 
     },
+    "Audio & Experience" : {
+
+    },
     "Aura" : {
 
     },
@@ -154,6 +166,9 @@
 
     },
     "Automatically curated based on your library." : {
+
+    },
+    "Based on your love for %@" : {
 
     },
     "Browse your entire collection." : {
@@ -185,6 +200,9 @@
     "Clear Entire Library" : {
 
     },
+    "Close" : {
+
+    },
     "COLUMNS & TYPES" : {
 
     },
@@ -204,6 +222,9 @@
         }
       }
     },
+    "Crossfade (5s)" : {
+
+    },
     "Database Management" : {
 
     },
@@ -217,6 +238,9 @@
 
     },
     "Drop Audio Files Here" : {
+
+    },
+    "Duplicate Finder" : {
 
     },
     "Duration" : {
@@ -236,6 +260,12 @@
       }
     },
     "Enter a SQL query and press Cmd+Enter" : {
+
+    },
+    "Equalizer" : {
+
+    },
+    "Equalizer (10-Band)" : {
 
     },
     "Every album you've collected." : {
@@ -271,6 +301,12 @@
         }
       }
     },
+    "Find Duplicates" : {
+
+    },
+    "Find More" : {
+
+    },
     "Genre" : {
 
     },
@@ -304,6 +340,9 @@
           }
         }
       }
+    },
+    "Library Maintenance" : {
+
     },
     "Library View" : {
 
@@ -351,6 +390,9 @@
           }
         }
       }
+    },
+    "No Duplicates Found" : {
+
     },
     "No Lyrics Found" : {
 
@@ -655,6 +697,9 @@
 
     },
     "Your collection is empty." : {
+
+    },
+    "Your library is nice and clean." : {
 
     }
   },

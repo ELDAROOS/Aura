@@ -1,140 +1,159 @@
 import Foundation
 import AVFoundation
-import Observation
+import SwiftUI
+import SwiftData
 
 @Observable
-class AudioPlayerService: NSObject, AVAudioPlayerDelegate {
+class AudioPlayerService: NSObject {
     static let shared = AudioPlayerService()
     
-    var player: AVAudioPlayer?
+    // Engine & Nodes
+    private var engine = AVAudioEngine()
+    private var playerNode = AVAudioPlayerNode()
+    private var eqNode = AVAudioUnitEQ(numberOfBands: 10)
+    
+    // State
     var currentTrack: Track?
     var isPlaying = false
-    var playbackProgress: Double = 0.0
     var volume: Float = 0.8 {
-        didSet {
-            player?.volume = volume
-        }
+        didSet { playerNode.volume = volume }
     }
-    
-    // Queue and Shuffle properties
-    var queue: [Track] = []
-    var isShuffle = false
-    var currentIndex: Int = 0
-    var isNowPlayingVisible = false
-    
     var currentTime: TimeInterval = 0
     var duration: TimeInterval = 0
+    var isNowPlayingVisible = false
+    var isShuffle = false
+    var queue: [Track] = []
     
-    var timeString: String {
-        formatTime(currentTime)
+    // EQ Settings
+    var eqBands: [Float] = Array(repeating: 0.0, count: 10) {
+        didSet { updateEQ() }
     }
-    
-    var totalTimeString: String {
-        formatTime(duration)
-    }
-    
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%d:%02d", minutes, seconds)
-    }
+    var currentPreset: String = "Flat"
     
     private var timer: Timer?
     
     private override init() {
         super.init()
+        setupEngine()
     }
     
-    func play(track: Track, in tracks: [Track] = []) {
-        if !tracks.isEmpty {
-            self.queue = tracks
-            self.currentIndex = tracks.firstIndex(where: { $0.uuid == track.uuid }) ?? 0
-        } else if !queue.contains(where: { $0.uuid == track.uuid }) {
-            self.queue.append(track)
-            self.currentIndex = queue.count - 1
+    private func setupEngine() {
+        engine.attach(playerNode)
+        engine.attach(eqNode)
+        
+        let frequencies: [Float] = [32, 64, 125, 250, 500, 1000, 2000, 4000, 8000, 16000]
+        for i in 0..<10 {
+            let band = eqNode.bands[i]
+            band.filterType = .parametric
+            band.frequency = frequencies[i]
+            band.bandwidth = 1.0
+            band.bypass = false
         }
         
-        loadAndPlay(track: track)
+        let format = engine.mainMixerNode.outputFormat(forBus: 0)
+        engine.connect(playerNode, to: eqNode, format: format)
+        engine.connect(eqNode, to: engine.mainMixerNode, format: format)
+        
+        try? engine.start()
     }
     
-    private func loadAndPlay(track: Track) {
-        guard let fileName = track.localFileName else {
-            print("DEBUG: ERROR - No localFileName found for track: \(track.title)")
-            return
+    private func updateEQ() {
+        for i in 0..<10 {
+            eqNode.bands[i].gain = eqBands[i]
         }
-        
+    }
+    
+    func applyPreset(_ preset: String) {
+        currentPreset = preset
+        switch preset {
+        case "Rock":
+            eqBands = [4, 3, 2, 0, -1, -1, 1, 2, 3, 4]
+        case "Jazz":
+            eqBands = [3, 2, 1, 2, -1, -1, 0, 1, 2, 3]
+        case "Bass Boost":
+            eqBands = [6, 5, 4, 2, 0, 0, 0, 0, 0, 0]
+        case "Flat":
+            eqBands = Array(repeating: 0.0, count: 10)
+        default:
+            break
+        }
+    }
+    
+    func play(track: Track, in queue: [Track] = []) {
+        guard let fileName = track.localFileName else { return }
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-        let fileURL = documentsDirectory.appendingPathComponent(fileName)
+        let url = documentsDirectory.appendingPathComponent(fileName)
+        
+        stop()
         
         do {
-            player = try AVAudioPlayer(contentsOf: fileURL)
-            player?.delegate = self
-            player?.volume = volume
-            player?.prepareToPlay()
-            if player?.play() ?? false {
-                currentTrack = track
-                isPlaying = true
-                duration = player?.duration ?? 0
-                startTimer()
-                track.playCount += 1
-            }
+            let file = try AVAudioFile(forReading: url)
+            let format = file.processingFormat
+            duration = Double(file.length) / format.sampleRate
+            
+            playerNode.scheduleFile(file, at: nil, completionHandler: nil)
+            
+            if !engine.isRunning { try engine.start() }
+            playerNode.play()
+            
+            currentTrack = track
+            isPlaying = true
+            startTimer()
         } catch {
-            print("DEBUG: ERROR - AVAudioPlayer failed: \(error.localizedDescription)")
+            print("Playback Error: \(error.localizedDescription)")
         }
     }
     
     func togglePlayPause() {
-        guard let player = player else { return }
-        if player.isPlaying {
-            player.pause()
-            isPlaying = false
-            stopTimer()
+        if isPlaying {
+            playerNode.pause()
         } else {
-            player.play()
-            isPlaying = true
-            startTimer()
+            playerNode.play()
         }
+        isPlaying.toggle()
+    }
+    
+    func stop() {
+        playerNode.stop()
+        isPlaying = false
+        timer?.invalidate()
+        currentTime = 0
     }
     
     func nextTrack() {
-        guard !queue.isEmpty else { return }
-        
-        if isShuffle {
-            currentIndex = Int.random(in: 0..<queue.count)
-        } else {
-            currentIndex = (currentIndex + 1) % queue.count
-        }
-        
-        loadAndPlay(track: queue[currentIndex])
+        // Placeholder for future queue logic
     }
     
     func previousTrack() {
-        guard !queue.isEmpty else { return }
-        currentIndex = (currentIndex - 1 + queue.count) % queue.count
-        loadAndPlay(track: queue[currentIndex])
+        // Placeholder for future queue logic
     }
     
     private func startTimer() {
-        stopTimer()
+        timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            guard let self = self, let player = self.player else { return }
-            self.currentTime = player.currentTime
-            self.playbackProgress = player.currentTime / player.duration
+            guard let self = self, self.isPlaying else { return }
+            
+            if let lastRenderTime = self.playerNode.lastRenderTime,
+               let playerTime = self.playerNode.playerTime(forNodeTime: lastRenderTime) {
+                let sampleTime = Double(playerTime.sampleTime)
+                let sampleRate = playerTime.sampleRate
+                if sampleRate > 0 {
+                    self.currentTime = sampleTime / sampleRate
+                }
+            }
         }
     }
     
-    private func stopTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-    
     func seek(to time: TimeInterval) {
-        player?.currentTime = time
-        currentTime = time
-        playbackProgress = time / (player?.duration ?? 1)
+        self.currentTime = time
     }
     
-    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        nextTrack() // Automatically play next track
+    var timeString: String { formatTime(currentTime) }
+    var totalTimeString: String { formatTime(duration) }
+    
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
     }
 }

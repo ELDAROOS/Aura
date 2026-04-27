@@ -17,6 +17,49 @@ struct HomeView: View {
                     .font(.system(size: 34, weight: .bold))
                     .padding(.horizontal)
                 
+                // MARK: - AI Discovery Section
+                if let topArtist = recommendedTracks.first?.album?.artist {
+                    VStack(alignment: .leading, spacing: 15) {
+                        HStack(spacing: 15) {
+                            Image(systemName: "sparkles")
+                                .font(.title)
+                                .foregroundColor(.accentColor)
+                            
+                            VStack(alignment: .leading) {
+                                Text("AI Discovery")
+                                    .font(.headline)
+                                Text("Based on your love for \(topArtist.name)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                            }
+                            
+                            Spacer()
+                            
+                            Button(action: {
+                                // This could trigger a specific search in ImportView
+                                // For now, we'll use a simple alert or print
+                                print("Searching YouTube for more from \(topArtist.name)")
+                            }) {
+                                Text("Find More")
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 8)
+                                    .background(Color.accentColor)
+                                    .cornerRadius(20)
+                                    .foregroundColor(.white)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding()
+                        .background(Color.accentColor.opacity(0.1))
+                        .cornerRadius(15)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 15)
+                                .stroke(Color.accentColor.opacity(0.2), lineWidth: 1)
+                        )
+                    }
+                    .padding(.horizontal)
+                }
+                
                 // MARK: - Recommended Tracks (Grid)
                 VStack(alignment: .leading, spacing: 15) {
                     Text("Recommended for You")

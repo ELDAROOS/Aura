@@ -10,6 +10,9 @@ struct SettingsView: View {
     @AppStorage("artist_view_style") private var artistViewStyle: String = "list"
     @State private var showingConfirmation = false
     @State private var showingConsole = false
+    @State private var showingEqualizer = false
+    @State private var showingDuplicates = false
+    @Query private var allTracks: [Track]
     
     let languages = [
         ("system", "System Default", "🖥️"),
@@ -64,6 +67,30 @@ struct SettingsView: View {
                         Label("Artists Style", systemImage: "square.grid.2x2")
                     }
                     .pickerStyle(.inline)
+                }
+                
+                Section("Audio & Experience") {
+                    Button(action: { showingEqualizer = true }) {
+                        Label("Equalizer (10-Band)", systemImage: "slider.horizontal.3")
+                    }
+                    .buttonStyle(.link)
+                    .sheet(isPresented: $showingEqualizer) {
+                        EqualizerView()
+                    }
+                    
+                    Toggle(isOn: .constant(true)) {
+                        Label("Crossfade (5s)", systemImage: "arrow.triangle.2.circlepath")
+                    }
+                }
+                
+                Section("Library Maintenance") {
+                    Button(action: { showingDuplicates = true }) {
+                        Label("Find Duplicates", systemImage: "doc.on.doc.fill")
+                    }
+                    .buttonStyle(.link)
+                    .sheet(isPresented: $showingDuplicates) {
+                        DuplicateFinderView(tracks: allTracks)
+                    }
                 }
                 
                 Section("Developer") {
