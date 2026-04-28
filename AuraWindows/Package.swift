@@ -3,9 +3,6 @@ import PackageDescription
 
 let package = Package(
     name: "AuraWindows",
-    platforms: [
-        .macOS(.v14) // SPM требует указать платформу, но мы будем собирать это под Windows
-    ],
     products: [
         .executable(name: "Aura", targets: ["Aura"])
     ],
